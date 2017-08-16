@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,6 +47,8 @@ import com.google.firebase.auth.FirebaseUser;
 import static com.example.admin.vkclub.Calling.context;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.security.PrivateKey;
+
 import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
 import static com.example.admin.vkclub.Calling.getInstance;
 import static com.example.admin.vkclub.R.id.email;
@@ -53,10 +58,11 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class EditProfile extends DialogFragment {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private DialogInterface.OnDismissListener onDismissListener;
 
     Toolbar toolbar;
     private EditText mName,mEmail,mConfirmpassword,mCurrentpass;
-    private TextView mNamevalidation,mEmailvalidation,mConfirmpassvalidation;
+    private TextView mNamevalidation,mEmailvalidation,mConfirmpassvalidation,mUpdatepass;
     private Button Updateprofile;
     FirebaseUser user;
     SharedPreferences preference;
@@ -79,20 +85,25 @@ public class EditProfile extends DialogFragment {
         mConfirmpassword = (EditText) view.findViewById(R.id.confirmpass1);
         Updateprofile = (Button) view.findViewById(R.id.updateprofile);
         mCurrentpass = (EditText) view.findViewById(pass);
+        mUpdatepass = (TextView) view.findViewById(R.id.updatepass);
 
         mNamevalidation = (TextView) view.findViewById(R.id.nameValidation1);
         mEmailvalidation = (TextView) view.findViewById(R.id.emailValidation1);
         mConfirmpassvalidation = (TextView) view.findViewById(R.id.confirmpassValidation);
 
         //get name and email info of user from firebase
+
+
         user = mAuth.getCurrentUser();
         mName.setText(user.getDisplayName());
         mEmail.setText(user.getEmail());
 
+//        DatabaseReference myRef = database.getReference("message");
+
         preference = PreferenceManager.getDefaultSharedPreferences(getContext());
         final String currentpass = preference.getString("pass",null);
         if(!currentpass.equals(null)){
-            Log.d("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH", currentpass);
+            Log.d("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH  ", currentpass);
         }
 
         TextWatcher editTextWatcher = new TextWatcher() {
@@ -203,10 +214,19 @@ public class EditProfile extends DialogFragment {
                 dismiss();
             }
         });
+
+        mUpdatepass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showDialog();
+            }
+        });
     }
+
 
     private void updateaccount(final String getname, final String getemail, final String getconfirmpass){
         user = mAuth.getCurrentUser();
+
         final AuthCredential credential = EmailAuthProvider
                 .getCredential(user.getEmail(),getconfirmpass);
         user.reauthenticate(credential)
@@ -222,6 +242,9 @@ public class EditProfile extends DialogFragment {
                                         .build();
                                 user.updateProfile(profileUpdate);
                                 Toast.makeText(getContext(),"Done." ,Toast.LENGTH_LONG).show();
+                                Intent intent  = new Intent(getContext(),LoginActivity.class);
+                                startActivity(intent);
+                                dismiss();
 
                             }else{
                                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
@@ -337,6 +360,38 @@ public class EditProfile extends DialogFragment {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public void showDialog() {
+        UpdatePassword newFragment = new UpdatePassword();
+        FragmentManager fragmentManager = getFragmentManager();
+        if ((getResources().getConfiguration().screenLayout &
+                Configuration.SCREENLAYOUT_SIZE_MASK) ==
+                Configuration.SCREENLAYOUT_SIZE_LARGE) {
+            // The device is using a large layout, so show the fragment as a dialog
+            newFragment.show(fragmentManager, "dialog");
+        } else {
+            // The device is smaller, so show the fragment fullscreen
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            // For a little polish, specify a transition animation
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            // To make it fullscreen, use the 'content' root view as the container
+            // for the fragment, which is always the root view for the activity
+            transaction.add(R.id.drawerLayout, newFragment)
+                    .addToBackStack(null).commit();
+        }
+    }
+
+    public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
+        this.onDismissListener = onDismissListener;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (onDismissListener != null) {
+            onDismissListener.onDismiss(dialog);
+        }
     }
 
 }

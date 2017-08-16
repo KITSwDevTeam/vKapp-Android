@@ -4,6 +4,42 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground"
     tools:context="com.example.admin.vkclub.Setting">
+
+    <Switch
+        android:id="@+id/settingbtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorWhite"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10sp"
+        android:layout_marginRight="10sp"
+        android:text="Notification"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="5dp"
+        android:textSize="20sp"
+        android:textColor="@color/colorGrey"
+        android:layout_centerVertical="true"
+        android:theme="@style/MySwitch"
+        />
+
+    <TextView
+        android:id="@+id/help"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10sp"
+        android:layout_marginBottom="150sp"
+        android:layout_marginLeft="10sp"
+        android:layout_marginTop="5dp"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:paddingLeft="5dp"
+        android:textSize="20sp"
+        android:text="Help"
+        android:textColor="@color/colorGrey"
+        android:background="@color/colorWhite" />
 
 </LinearLayout>

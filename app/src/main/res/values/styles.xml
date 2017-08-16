@@ -71,4 +71,14 @@
         <item name="android:visibility">gone</item>
     </style>
 
+    <style name="MySwitch" parent="Theme.AppCompat.Light">
+        <!-- active thumb & track color (30% transparency) -->
+        <item name="colorControlActivated">@color/colorBackground</item>
+
+        <!-- inactive thumb color -->
+        <item name="colorSwitchThumbNormal">@color/colorGrey</item>
+
+
+    </style>
+
 </resources>

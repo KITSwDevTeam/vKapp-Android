@@ -17,6 +17,7 @@ import android.net.sip.SipSession;
 import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -175,7 +176,7 @@ public class Dashboard extends AppCompatActivity {
     public Voip voipClient;
 
     private BroadcastReceiver broadcastReceiver;
-//    String phoneNumber= "+13343758067";
+    //    String phoneNumber= "+13343758067";
     String phoneNumber= "+855962304669";
     String message, facebookUserId = "";
     int statusCode;
@@ -417,7 +418,7 @@ public class Dashboard extends AppCompatActivity {
                             if (selectedText.equals("Reception(+855 78 777 284)")) {
                                 if (((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getPhoneType()
                                         == TelephonyManager.PHONE_TYPE_NONE){
-                                    presentDialog("NO PHONE", "The device does not support with this feature.");
+                                    presentDialog("NO PHONE", "ARE YOU OK?");
                                 }else {
                                     Intent callIntent = new Intent(Intent.ACTION_CALL);
                                     callIntent.setData(Uri.parse("tel:078777284"));
@@ -433,7 +434,7 @@ public class Dashboard extends AppCompatActivity {
                                     presentDialog("NO PHONE", "The device does not support with this feature.");
                                 }else {
                                     Intent callIntent = new Intent(Intent.ACTION_CALL);
-                                    callIntent.setData(Uri.parse("tel:0962222735"));
+                                    callIntent.setData(Uri.parse("tel:078777284"));
                                     if (ActivityCompat.checkSelfPermission(Dashboard.this,
                                             Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                                         return;
@@ -473,41 +474,41 @@ public class Dashboard extends AppCompatActivity {
                             PendingIntent sentPI = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(SENT), 0);
                             PendingIntent deliveredPI = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(DELIVERED), 0);
 
-                            //---when the SMS has been sent---
-                            registerReceiver(new BroadcastReceiver() {
-                                @Override
-                                public void onReceive(Context arg0, Intent arg1) {
-                                    switch (getResultCode()) {
-                                        case Activity.RESULT_OK:
-                                            presentDialog("Send SOS Success", "Your emergency message has been successfully sent.\nThank you for using Vkclub.");
-                                            break;
-                                        case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-                                            Toast.makeText(getBaseContext(), "Generic failure", Toast.LENGTH_SHORT).show();
-                                            presentDialog("Send SOS failed", "Sorry, There might be some problem with the device itself. Please try again\n" +
-                                                    "Thank you for using Vkclub.");
-                                            break;
-                                        case SmsManager.RESULT_ERROR_NO_SERVICE:
-                                            presentDialog("Send SOS failed", "Sorry, It seem like your signal is quite slow. Please try again.\n" +
-                                                    "Thank you for using Vkclub.");
-                                            break;
+                                //---when the SMS has been sent---
+                                registerReceiver(new BroadcastReceiver() {
+                                    @Override
+                                    public void onReceive(Context arg0, Intent arg1) {
+                                        switch (getResultCode()) {
+                                            case Activity.RESULT_OK:
+                                                presentDialog("Send SOS Success", "Your emergency message has been successfully sent.\nThank you for using Vkclub.");
+                                                break;
+                                            case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                                                Toast.makeText(getBaseContext(), "Generic failure", Toast.LENGTH_SHORT).show();
+                                                presentDialog("Send SOS failed", "Sorry, There might be some problem with the device itself. Please try again\n" +
+                                                        "Thank you for using Vkclub.");
+                                                break;
+                                            case SmsManager.RESULT_ERROR_NO_SERVICE:
+                                                presentDialog("Send SOS failed", "Sorry, It seem like your signal is quite slow. Please try again.\n" +
+                                                        "Thank you for using Vkclub.");
+                                                break;
+                                        }
                                     }
-                                }
-                            }, new IntentFilter(SENT));
+                                }, new IntentFilter(SENT));
 
-                            //---when the SMS has been delivered---
-                            registerReceiver(new BroadcastReceiver() {
-                                @Override
-                                public void onReceive(Context arg0, Intent arg1) {
-                                    switch (getResultCode()) {
-                                        case Activity.RESULT_OK:
-                                            Toast.makeText(getBaseContext(), "Emergency SOS message has been successfully delivered", Toast.LENGTH_SHORT).show();
-                                            break;
-                                        case Activity.RESULT_CANCELED:
-                                            Toast.makeText(getBaseContext(), "Emergency SOS message was not delivered.", Toast.LENGTH_SHORT).show();
-                                            break;
+                                //---when the SMS has been delivered---
+                                registerReceiver(new BroadcastReceiver() {
+                                    @Override
+                                    public void onReceive(Context arg0, Intent arg1) {
+                                        switch (getResultCode()) {
+                                            case Activity.RESULT_OK:
+                                                Toast.makeText(getBaseContext(), "Emergency SOS message has been successfully delivered", Toast.LENGTH_SHORT).show();
+                                                break;
+                                            case Activity.RESULT_CANCELED:
+                                                Toast.makeText(getBaseContext(), "Emergency SOS message was not delivered.", Toast.LENGTH_SHORT).show();
+                                                break;
+                                        }
                                     }
-                                }
-                            }, new IntentFilter(DELIVERED));
+                                }, new IntentFilter(DELIVERED));
 
                             SmsManager sms = SmsManager.getDefault();
                             if (statusCode == 0 && isLocationEnabled){
@@ -914,7 +915,7 @@ public class Dashboard extends AppCompatActivity {
         new BitmapFromUrl(userPhoto, uploading).execute(photoUrl);
     }
 
-//    get camera
+    //    get camera
     private void dispatchTakePictureIntent() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{
@@ -1562,6 +1563,49 @@ public class Dashboard extends AppCompatActivity {
             }
         });
     }
+
+    private void displayProgressNotification(){
+        mNotifyManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = new NotificationCompat.Builder(this);
+        mBuilder.setContentTitle("Picture Download")
+                .setContentText("Download in progress");
+// Start a lengthy operation in a background thread
+        new Thread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        int incr;
+                        // Do the "lengthy" operation 20 times
+                        for (incr = 0; incr <= 100; incr+=5) {
+                            // Sets the progress indicator to a max value, the
+                            // current completion percentage, and "determinate"
+                            // state
+                            mBuilder.setProgress(100, incr, false);
+                            // Displays the progress bar for the first time.
+                            mNotifyManager.notify(id, mBuilder.build());
+                            // Sleeps the thread, simulating an operation
+                            // that takes time
+                            try {
+                                // Sleep for 5 seconds
+                                Thread.sleep(5*1000);
+                            } catch (InterruptedException e) {
+                                Log.d("000000000000000000000000000000", "sleep failure");
+                            }
+                        }
+                        // When the loop is finished, updates the notification
+                        mBuilder.setContentText("Download complete")
+                                // Removes the progress bar
+                                .setProgress(0,0,false)
+                                .setDefaults(Notification.DEFAULT_ALL)
+                                .setPriority(Notification.PRIORITY_MAX);
+                        mNotifyManager.notify(id, mBuilder.build());
+                    }
+                }
+// Starts the thread by calling the run() method in its Runnable
+        ).start();
+    }
+}
 
     private void displayProgressNotification(){
         mNotifyManager =

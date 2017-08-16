@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:text="Room Reservation : "
             android:textColor="#000000"
-            android:layout_marginLeft="15dp"/>
+            android:layout_marginLeft="20dp"/>
         <LinearLayout
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
             android:textColor="@color/colorWhite"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="20dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:text="Reception: "
             android:textColor="#000000"
-            android:layout_marginLeft="15dp"/>
+            android:layout_marginLeft="20dp"/>
         <LinearLayout
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
@@ -53,12 +53,12 @@
             android:id="@+id/reception"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Book Now"
+            android:text="Call Now"
             android:background="#1a6930"
             android:textColor="@color/colorWhite"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="20dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:text="Activity : "
             android:textColor="#000000"
-            android:layout_marginLeft="15dp"/>
+            android:layout_marginLeft="20dp"/>
         <LinearLayout
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
@@ -80,12 +80,12 @@
             android:id="@+id/activitybtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Book now"
+            android:text="Call Now"
             android:background="#1a6930"
             android:textColor="@color/colorWhite"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="20dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -98,7 +98,7 @@
             android:layout_height="wrap_content"
             android:text="Pine View Kitchen : "
             android:textColor="#000000"
-            android:layout_marginLeft="15dp"/>
+            android:layout_marginLeft="20dp"/>
         <LinearLayout
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
@@ -107,12 +107,12 @@
             android:id="@+id/pineviewkitchen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Book now"
+            android:text="Call Now"
             android:background="#1a6930"
             android:textColor="@color/colorWhite"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="20dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -125,7 +125,7 @@
             android:layout_height="wrap_content"
             android:text="Message Service : "
             android:textColor="#000000"
-            android:layout_marginLeft="15dp"/>
+            android:layout_marginLeft="20dp"/>
         <LinearLayout
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
@@ -134,12 +134,12 @@
             android:id="@+id/messageservice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Book now"
+            android:text="Call Now"
             android:background="#1a6930"
             android:textColor="@color/colorWhite"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="20dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -152,7 +152,7 @@
             android:layout_height="wrap_content"
             android:text="HouseKeeping : "
             android:textColor="#000000"
-            android:layout_marginLeft="15dp"/>
+            android:layout_marginLeft="20dp"/>
         <LinearLayout
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
@@ -161,12 +161,12 @@
             android:id="@+id/housekeeping"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Book now"
+            android:text="Call Now"
             android:background="#1a6930"
             android:textColor="@color/colorWhite"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="20dp"/>
     </LinearLayout>
 
 </LinearLayout>
