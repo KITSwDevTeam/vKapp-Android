@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.graphics.Matrix;
 import android.media.Image;
 import android.media.MediaPlayer;
@@ -16,6 +17,7 @@ import android.net.sip.SipSession;
 import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -210,6 +212,8 @@ public class Dashboard extends AppCompatActivity {
     NotificationCompat.Builder mBuilder;
     int id = 1;
 
+    private static boolean testNotificationToggle = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -318,6 +322,17 @@ public class Dashboard extends AppCompatActivity {
 //                startActivity(getIntent());
 //                overridePendingTransition(0, 0);
                 displayProgressNotification();
+//                testNotificationToggle = !testNotificationToggle;
+//                presentDialog("Current test var", String.valueOf(testNotificationToggle));
+//                if (testNotificationToggle){
+//                    PackageManager pm = getApplicationContext().getPackageManager();
+//                    ComponentName componentName = new ComponentName(Dashboard.this, MyFirebaseMessagingService.class);
+//                    pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+//                }else {
+//                    PackageManager pm = getApplicationContext().getPackageManager();
+//                    ComponentName componentName = new ComponentName(Dashboard.this, MyFirebaseMessagingService.class);
+//                    pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+//                }
             }
         });
 
@@ -403,7 +418,7 @@ public class Dashboard extends AppCompatActivity {
                             if (selectedText.equals("Reception(+855 78 777 284)")) {
                                 if (((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getPhoneType()
                                         == TelephonyManager.PHONE_TYPE_NONE){
-                                    presentDialog("NO PHONE", "The device does not support with this feature.");
+                                    presentDialog("NO PHONE", "ARE YOU OK?");
                                 }else {
                                     Intent callIntent = new Intent(Intent.ACTION_CALL);
                                     callIntent.setData(Uri.parse("tel:078777284"));
@@ -436,28 +451,28 @@ public class Dashboard extends AppCompatActivity {
                 }
             });
 
-            //Alert button sos
-            Button sos = (Button) findViewById(R.id.sos);
-            sos.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    final boolean isLocationEnabled;
-                    if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                        isLocationEnabled = true;
-                    }else {
-                        isLocationEnabled = false;
-                    }
-                    final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Dashboard.this);
-                    alertDialog.setTitle("Please help! ");
-                    alertDialog.setMessage("I'm currently facing an emergency problem.");
-                    AlertDialog.Builder confirm = alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (ContextCompat.checkSelfPermission(getAppContext(), Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_DENIED){
-                                String SENT = "SMS_SENT";
-                                String DELIVERED = "SMS_DELIVERED";
-                                PendingIntent sentPI = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(SENT), 0);
-                                PendingIntent deliveredPI = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(DELIVERED), 0);
+        //Alert button sos
+        Button sos = (Button) findViewById(R.id.sos);
+        sos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                final boolean isLocationEnabled;
+                if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                    isLocationEnabled = true;
+                }else {
+                    isLocationEnabled = false;
+                }
+                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Dashboard.this);
+                alertDialog.setTitle("Please help! ");
+                alertDialog.setMessage("I'm currently facing an emergency problem.");
+                AlertDialog.Builder confirm = alertDialog.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (ContextCompat.checkSelfPermission(getAppContext(), Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_DENIED){
+                            String SENT = "SMS_SENT";
+                            String DELIVERED = "SMS_DELIVERED";
+                            PendingIntent sentPI = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(SENT), 0);
+                            PendingIntent deliveredPI = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(DELIVERED), 0);
 
                                 //---when the SMS has been sent---
                                 registerReceiver(new BroadcastReceiver() {
@@ -495,64 +510,64 @@ public class Dashboard extends AppCompatActivity {
                                     }
                                 }, new IntentFilter(DELIVERED));
 
-                                SmsManager sms = SmsManager.getDefault();
-                                if (statusCode == 0 && isLocationEnabled){
-                                    Intent smsIn = new Intent(Intent.ACTION_VIEW);
-                                    smsIn.setData(Uri.parse("sms:" + phoneNumber));
-                                    smsIn.putExtra("sms_body", message);
-                                    startActivity(smsIn);
-                                }
-//                                sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
-                                else if (statusCode == 1) {
-                                    String title = "Off Kirirom Mode";
-                                    presentDialog(title, "This function cannot be used outside kirirom area.");
-                                } else if (statusCode == 2 || !isLocationEnabled) {
-
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(getAppContext());
-                                    builder.setTitle("Unidentified");
-                                    builder.setMessage("Location provider disabled.");
-                                    builder.setCancelable(true);
-
-                                    builder.setPositiveButton(
-                                            "Enable",
-                                            new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int id) {
-                                                    Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                    startActivity(i);
-                                                }
-                                            });
-                                    builder.setNegativeButton(
-                                            "Cancel",
-                                            new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int id) {
-                                                    dialog.cancel();
-                                                }
-                                            });
-
-                                    AlertDialog alert = builder.create();
-                                    alert.show();
-                                }else {
-                                    presentDialog("Lolzz", "Another condition");
-                                }
-                            }else {
-                                ActivityCompat.requestPermissions(Dashboard.dashboardActivity, new String[]{
-                                        Manifest.permission.SEND_SMS
-                                }, 150);
+                            SmsManager sms = SmsManager.getDefault();
+                            if (statusCode == 0 && isLocationEnabled){
+                                Intent smsIn = new Intent(Intent.ACTION_VIEW);
+                                smsIn.setData(Uri.parse("sms:" + phoneNumber));
+                                smsIn.putExtra("sms_body", message);
+                                startActivity(smsIn);
                             }
-                        }
-                    });
+//                                sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
+                            else if (statusCode == 1) {
+                                String title = "Off Kirirom Mode";
+                                presentDialog(title, "This function cannot be used outside kirirom area.");
+                            } else if (statusCode == 2 || !isLocationEnabled) {
 
-                    // Setting Negative "NO" Button
-                    alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getAppContext());
+                                builder.setTitle("Unidentified");
+                                builder.setMessage("Location provider disabled.");
+                                builder.setCancelable(true);
+
+                                builder.setPositiveButton(
+                                        "Enable",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                startActivity(i);
+                                            }
+                                        });
+                                builder.setNegativeButton(
+                                        "Cancel",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                                AlertDialog alert = builder.create();
+                                alert.show();
+                            }else {
+                                presentDialog("Lolzz", "Another condition");
+                            }
+                        }else {
+                            ActivityCompat.requestPermissions(Dashboard.dashboardActivity, new String[]{
+                                    Manifest.permission.SEND_SMS
+                            }, 150);
                         }
-                    });
-                    // Showing Alert Message
-                    alertDialog.show();
-                }
-            });
+                    }
+                });
+
+                // Setting Negative "NO" Button
+                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                // Showing Alert Message
+                alertDialog.show();
+            }
+        });
         }
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.Vkclub.INCOMING_CALL");
@@ -1548,6 +1563,49 @@ public class Dashboard extends AppCompatActivity {
             }
         });
     }
+
+    private void displayProgressNotification(){
+        mNotifyManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = new NotificationCompat.Builder(this);
+        mBuilder.setContentTitle("Picture Download")
+                .setContentText("Download in progress");
+// Start a lengthy operation in a background thread
+        new Thread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        int incr;
+                        // Do the "lengthy" operation 20 times
+                        for (incr = 0; incr <= 100; incr+=5) {
+                            // Sets the progress indicator to a max value, the
+                            // current completion percentage, and "determinate"
+                            // state
+                            mBuilder.setProgress(100, incr, false);
+                            // Displays the progress bar for the first time.
+                            mNotifyManager.notify(id, mBuilder.build());
+                            // Sleeps the thread, simulating an operation
+                            // that takes time
+                            try {
+                                // Sleep for 5 seconds
+                                Thread.sleep(5*1000);
+                            } catch (InterruptedException e) {
+                                Log.d("000000000000000000000000000000", "sleep failure");
+                            }
+                        }
+                        // When the loop is finished, updates the notification
+                        mBuilder.setContentText("Download complete")
+                                // Removes the progress bar
+                                .setProgress(0,0,false)
+                                .setDefaults(Notification.DEFAULT_ALL)
+                                .setPriority(Notification.PRIORITY_MAX);
+                        mNotifyManager.notify(id, mBuilder.build());
+                    }
+                }
+// Starts the thread by calling the run() method in its Runnable
+        ).start();
+    }
+}
 
     private void displayProgressNotification(){
         mNotifyManager =

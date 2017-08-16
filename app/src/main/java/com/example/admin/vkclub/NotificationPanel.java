@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class NotificationPanel extends DialogFragment {
     Toolbar toolbar;
     private static final String TAG = "NotificationPanel";
     private ListView mListView;
+    private TextView noItems;
 
     DataBaseHelper mDataBaseHelper;
 
@@ -61,10 +63,14 @@ public class NotificationPanel extends DialogFragment {
 
     private void findView(View view){
         mListView = (ListView)view.findViewById(R.id.notification_panel);
+        noItems = (TextView)view.findViewById(R.id.no_item);
+
         mDataBaseHelper = new DataBaseHelper(getContext());
         NotificationPanel.returnDbHelper = mDataBaseHelper;
         dashboard = (Dashboard) Dashboard.getAppContext();
 
+        noItems.bringToFront();
+        noItems.setVisibility(View.GONE);
         populateListView();
     }
 
@@ -86,6 +92,10 @@ public class NotificationPanel extends DialogFragment {
 
         for (int j=0; j<data.getCount(); j++){
             listData.add(listDataTemp[j]);
+        }
+
+        if (listData.size() == 0){
+            noItems.setVisibility(View.VISIBLE);
         }
 
         //instantiate custom adapter

@@ -51,6 +51,8 @@ public class CreateAccount extends AppCompatActivity {
     private ProgressBar spinner;
     private static boolean nameStatus, emailStatus, passwordStatus, confirmpassStatus;
 
+    static boolean flag;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,46 +94,59 @@ public class CreateAccount extends AppCompatActivity {
 
         TextWatcher editTextWatcher = new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > 0){
-                    for (int i=0; i<s.length(); i++){
-                        if (!((s.charAt(i) > 64 && s.charAt(i) < 91) || (s.charAt(i) > 96 && s.charAt(i) < 123) || s.charAt(i) == 32)){
-                            nameValidate.setText("Special characters not allowed.");
-                            new android.os.Handler().postDelayed(
-                                    new Runnable() {
-                                        public void run() {
-                                            nameValidate.setText("");
-                                        }
-                                    }, 4000);
-                            nameStatus = false;
-                        }else {
-                            nameStatus = true;
-                        }
-                    }
-
-                    if (s.length() == 20){
+                if (name.getText().hashCode() == s.hashCode()){
+                    if (!s.toString().matches("[a-zA-Z.? ]*")){
+                        nameValidate.setText("Special characters not allowed.");
+                    }else if (s.length() == 0){
+                        nameValidate.setText("Please enter your name.");
+                    }else if (s.length() == 20){
                         nameValidate.setText("Allow only 20 characters.");
                         new android.os.Handler().postDelayed(
                                 new Runnable() {
                                     public void run() {
                                         nameValidate.setText("");
                                     }
-                                }, 4000);
+                                }, 3000);
+                    }else {
+                        nameValidate.setText("");
+                    }
+                }else if (email.getText().hashCode() == s.hashCode()){
+                    if (s.toString().indexOf("@") <= 0){
+                        emailValidate.setText("Please enter a valid email address.");
+                    }else if (s.length() == 0){
+                        nameValidate.setText("Please provide your email address.");
+                    }else {
+                        nameValidate.setText("");
+                    }
+                }else if (pass.getText().hashCode() == s.hashCode()){
+                    if ((s.length() != 0) && s.length() < 6){
+                        passValidate.setText("Please provide at least 6 characters.");
+                    }else if (s.length() == 0){
+                        passValidate.setText("Please provide your password.");
+                    }else {
+                        passValidate.setText("");
+                    }
+                }else {
+                    if (!s.toString().equals(pass.getText().toString())){
+                        confirmpassValidate.setText("Password does not match.");
+                    }else {
+                        confirmpassValidate.setText("");
                     }
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         };
+
         name.addTextChangedListener(editTextWatcher);
+        email.addTextChangedListener(editTextWatcher);
+        pass.addTextChangedListener(editTextWatcher);
+        confirmPass.addTextChangedListener(editTextWatcher);
 
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,31 +159,29 @@ public class CreateAccount extends AppCompatActivity {
                 for (int i=0; i<nameValue.length(); i++){
                     if (!((nameValue.charAt(i) > 64 && nameValue.charAt(i) < 91) ||
                             (nameValue.charAt(i) > 96 && nameValue.charAt(i) < 123) || nameValue.charAt(i) == 32)){
-                        nameValidate.setText("Special characters not allowed.");
-                        new android.os.Handler().postDelayed(
-                                new Runnable() {
-                                    public void run() {
-                                        nameValidate.setText("");
-                                    }
-                                }, 4000);
-                        nameStatus = false;
-                    }else {
-                        nameStatus = true;
+                        flag = false;
+                        break;
                     }
                 }
 
                 if (nameValue.length() == 0) {
-                    nameValidate.setText("Please enter your name.");
+                    nameValidate.setText("Please enter a valid name.");
                     nameStatus = false;
-                }else {
+                }else if (flag == false){
+                    nameValidate.setText("Special characters not allowed.");
+                    nameStatus = false;
+                } else {
                     nameValidate.setText("");
                     nameStatus = true;
                 }
 
-                if ((emailValue.indexOf("@") <= 0) || emailValue.length() == 0) {
+                if (emailValue.indexOf("@") <= 0) {
                     emailValidate.setText("Please enter a valid email address.");
                     emailStatus = false;
-                }else {
+                }else if (emailValue.length() == 0){
+                    emailValidate.setText("Please provide your email address.");
+                    emailStatus = false;
+                } else {
                     emailValidate.setText("");
                     emailStatus = true;
                 }
@@ -185,7 +198,7 @@ public class CreateAccount extends AppCompatActivity {
                     confirmpassValidate.setText("Please provide at least 6 characters.");
                     confirmpassStatus = false;
                 }else if (!confirmpassValue.equals(passwordValue)) {
-                    confirmpassValidate.setText("Passwword does not match!");
+                    confirmpassValidate.setText("Password does not match!");
                     confirmpassStatus = false;
                 }else {
                     confirmpassValidate.setText("");
@@ -194,17 +207,15 @@ public class CreateAccount extends AppCompatActivity {
 
                 if (nameStatus && emailStatus && passwordStatus && confirmpassStatus) {
                     createAccount(emailValue, passwordValue,nameValue);
-                }else {
-                    presentDialog("Error", "Something went wrong.");
                 }
             }
         });
     }
 
-    private void createAccount(final String email, final String password,final String nameValue) {
+    private void createAccount(final String successEmail, final String successpassword,final String nameValue) {
         spinner.setVisibility(View.VISIBLE);
         statusText.setText("Processing...");
-        mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+        mAuth.createUserWithEmailAndPassword(successEmail,successpassword).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
@@ -221,12 +232,15 @@ public class CreateAccount extends AppCompatActivity {
                     if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                         // thrown if there already exists an account with the given email address
                         presentDialog("SignUp Failed..", "Account is already exists with the given email address.");
+                        email.requestFocus();
                     } else if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                         // thrown if the email address is malformed
                         presentDialog("SignUp Failed..", "The email address is malformed.");
+                        email.requestFocus();
                     } else if (task.getException() instanceof FirebaseAuthWeakPasswordException) {
                         // thrown if the password is not strong enough
                         presentDialog("SignUp Failed..", "The password is not strong enough.");
+                        pass.requestFocus();
                     } else {
                         try {
                             task.getException();

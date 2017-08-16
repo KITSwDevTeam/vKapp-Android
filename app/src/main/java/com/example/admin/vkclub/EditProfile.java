@@ -17,6 +17,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,7 +66,8 @@ public class EditProfile extends DialogFragment {
     private Button Updateprofile;
     FirebaseUser user;
     SharedPreferences preference;
-
+    SharedPreferences.Editor editor;
+    private static boolean flag;
 
 
     @Nullable
@@ -103,6 +106,53 @@ public class EditProfile extends DialogFragment {
             Log.d("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH  ", currentpass);
         }
 
+        TextWatcher editTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (mName.getText().hashCode() == s.hashCode()){
+                    if (!s.toString().matches("[a-zA-Z.? ]*")){
+                        mNamevalidation.setText("Special characters not allowed.");
+                    }else if (s.length() == 0){
+                        mNamevalidation.setText("Please enter your name.");
+                    }else if (s.length() == 20){
+                        mNamevalidation.setText("Allow only 20 characters.");
+                        new android.os.Handler().postDelayed(
+                                new Runnable() {
+                                    public void run() {
+                                        mNamevalidation.setText("");
+                                    }
+                                }, 3000);
+                    }else {
+                        mNamevalidation.setText("");
+                    }
+                }else if (mEmail.getText().hashCode() == s.hashCode()){
+                    if (s.toString().indexOf("@") <= 0){
+                        mEmailvalidation.setText("Please enter a valid email address.");
+                    }else if (s.length() == 0){
+                        mEmailvalidation.setText("Please provide your email address.");
+                    }else {
+                        mEmailvalidation.setText("");
+                    }
+                }else {
+                    if (!s.toString().equals(currentpass)){
+                        mConfirmpassvalidation.setText("Password does not match.");
+                    }else {
+                        mConfirmpassvalidation.setText("");
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        mName.addTextChangedListener(editTextWatcher);
+        mEmail.addTextChangedListener(editTextWatcher);
+        mConfirmpassword.addTextChangedListener(editTextWatcher);
+
         Updateprofile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,20 +161,36 @@ public class EditProfile extends DialogFragment {
                 String confirmpassValue = mConfirmpassword.getText().toString();
                 boolean nameStatus, emailStatus, confirmpassStatus;
 
-                if(nameValue.isEmpty()){
-                    mNamevalidation.setText("Please enter your name.");
+                for (int i=0; i<nameValue.length(); i++){
+                    if (!((nameValue.charAt(i) > 64 && nameValue.charAt(i) < 91) ||
+                            (nameValue.charAt(i) > 96 && nameValue.charAt(i) < 123) || nameValue.charAt(i) == 32)){
+                        flag = false;
+                        break;
+                    }
+                }
+
+                if (nameValue.length() == 0) {
+                    mNamevalidation.setText("Please enter a valid name.");
                     nameStatus = false;
-                }else {
+                }else if (flag == false){
+                    mNamevalidation.setText("Special characters not allowed.");
+                    nameStatus = false;
+                } else {
                     mNamevalidation.setText("");
                     nameStatus = true;
                 }
-                if ((emailValue.indexOf("@") <= 0) || !emailValue.contains(".com") || emailValue.isEmpty()) {
+
+                if (emailValue.indexOf("@") <= 0) {
                     mEmailvalidation.setText("Please enter a valid email address.");
+                    emailStatus = false;
+                }else if (emailValue.length() == 0){
+                    mEmailvalidation.setText("Please provide your email address.");
                     emailStatus = false;
                 } else {
                     mEmailvalidation.setText("");
                     emailStatus = true;
                 }
+
                 if (!confirmpassValue.equals(currentpass)) {
                     mConfirmpassvalidation.setText("Passwword does not match!");
                     confirmpassStatus = false;
@@ -132,6 +198,7 @@ public class EditProfile extends DialogFragment {
                     mConfirmpassvalidation.setText("");
                     confirmpassStatus = true;
                 }
+
                 if(nameStatus && emailStatus && confirmpassStatus){
                    updateaccount(nameValue, emailValue, confirmpassValue);
                 }
