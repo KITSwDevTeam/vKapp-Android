@@ -154,7 +154,7 @@ public class Dashboard extends AppCompatActivity {
     private static final int REQUEST_CROP_ICON = 168;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private DrawerLayout mDrawerLayout;
+    public DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mToggle;
     private Button voipBtn, setting, openNotification, aboutUs,mService;
     private Button logoutBtn, opendrawer, appmode, mapButton, membershipBtn, mProvider, mContact, mUpdateprofile, mSetting;
@@ -187,7 +187,7 @@ public class Dashboard extends AppCompatActivity {
     public SipProfile mSipProfile = null;
     public SipAudioCall audioCall = null;
     public String callAddress = "";
-    public String sipUsername;
+    public static String sipUsername = "10202";
     public String sipDomain;
     public String sipPassword;
     public int sipPort = 5060;
@@ -222,6 +222,10 @@ public class Dashboard extends AppCompatActivity {
         Dashboard.dashboardActivity = this;
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         dbBitmapUtility = new DbBitmapUtility();
+
+        PackageManager pm = getApplicationContext().getPackageManager();
+        ComponentName componentName = new ComponentName(Dashboard.this, MyFirebaseMessagingService.class);
+        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
 
         storage = FirebaseStorage.getInstance();
 
@@ -321,7 +325,7 @@ public class Dashboard extends AppCompatActivity {
 //                finish();
 //                startActivity(getIntent());
 //                overridePendingTransition(0, 0);
-                displayProgressNotification();
+//                displayProgressNotification();
 //                testNotificationToggle = !testNotificationToggle;
 //                presentDialog("Current test var", String.valueOf(testNotificationToggle));
 //                if (testNotificationToggle){
@@ -628,8 +632,8 @@ public class Dashboard extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_DENIED
                 && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_DENIED){
             try {
-                SipProfile.Builder builder = new SipProfile.Builder("10205", "192.168.7.251");
-                builder.setPassword("A2apadbbx10205");
+                SipProfile.Builder builder = new SipProfile.Builder(sipUsername, "192.168.7.251");
+                builder.setPassword("A2apbx" + sipUsername);
                 builder.setPort(sipPort);
                 builder.setProtocol("UDP");
                 builder.setAutoRegistration(true);
@@ -1367,8 +1371,13 @@ public class Dashboard extends AppCompatActivity {
         }
 
         if (requestCode == REQUEST_CROP_ICON && resultCode == RESULT_OK && data != null){
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            upload(photo);
+            Bundle extras = data.getExtras();
+            if (extras != null){
+                Bitmap photo = extras.getParcelable("data");
+                upload(photo);
+            }else {
+                presentDialog("Error", "Please try again.\nThank you for using Vkclub.");
+            }
         }
     }
 
@@ -1535,7 +1544,7 @@ public class Dashboard extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     showDialog();
-                    mDrawerLayout.closeDrawer(Gravity.LEFT);
+                    mDrawerLayout.closeDrawer(Gravity.LEFT, false);
                 }
             });
         }else {
@@ -1570,50 +1579,7 @@ public class Dashboard extends AppCompatActivity {
         mBuilder = new NotificationCompat.Builder(this);
         mBuilder.setContentTitle("Picture Download")
                 .setContentText("Download in progress");
-// Start a lengthy operation in a background thread
-        new Thread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        int incr;
-                        // Do the "lengthy" operation 20 times
-                        for (incr = 0; incr <= 100; incr+=5) {
-                            // Sets the progress indicator to a max value, the
-                            // current completion percentage, and "determinate"
-                            // state
-                            mBuilder.setProgress(100, incr, false);
-                            // Displays the progress bar for the first time.
-                            mNotifyManager.notify(id, mBuilder.build());
-                            // Sleeps the thread, simulating an operation
-                            // that takes time
-                            try {
-                                // Sleep for 5 seconds
-                                Thread.sleep(5*1000);
-                            } catch (InterruptedException e) {
-                                Log.d("000000000000000000000000000000", "sleep failure");
-                            }
-                        }
-                        // When the loop is finished, updates the notification
-                        mBuilder.setContentText("Download complete")
-                                // Removes the progress bar
-                                .setProgress(0,0,false)
-                                .setDefaults(Notification.DEFAULT_ALL)
-                                .setPriority(Notification.PRIORITY_MAX);
-                        mNotifyManager.notify(id, mBuilder.build());
-                    }
-                }
-// Starts the thread by calling the run() method in its Runnable
-        ).start();
-    }
-}
-
-    private void displayProgressNotification(){
-        mNotifyManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(this);
-        mBuilder.setContentTitle("Picture Download")
-                .setContentText("Download in progress");
-// Start a lengthy operation in a background thread
+        // Start a lengthy operation in a background threa
         new Thread(
                 new Runnable() {
                     @Override

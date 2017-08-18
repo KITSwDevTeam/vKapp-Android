@@ -20,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,12 +69,13 @@ public class EditProfile extends DialogFragment {
     SharedPreferences preference;
     SharedPreferences.Editor editor;
     private static boolean flag;
-
+    Dashboard dh;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_edit_profile, container, false);
+        dh = (Dashboard) Dashboard.getAppContext();
         findView(view);
         return view;
     }
@@ -103,7 +105,7 @@ public class EditProfile extends DialogFragment {
         preference = PreferenceManager.getDefaultSharedPreferences(getContext());
         final String currentpass = preference.getString("pass",null);
         if(!currentpass.equals(null)){
-            Log.d("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH  ", currentpass);
+            Log.d("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH ", currentpass);
         }
 
         TextWatcher editTextWatcher = new TextWatcher() {
@@ -113,10 +115,10 @@ public class EditProfile extends DialogFragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (mName.getText().hashCode() == s.hashCode()){
-                    if (!s.toString().matches("[a-zA-Z.? ]*")){
-                        mNamevalidation.setText("Special characters not allowed.");
-                    }else if (s.length() == 0){
+                    if (s.length() == 0){
                         mNamevalidation.setText("Please enter your name.");
+                    }else if (!s.toString().matches("[a-zA-Z.? ]*")){
+                        mNamevalidation.setText("Special characters not allowed.");
                     }else if (s.length() == 20){
                         mNamevalidation.setText("Allow only 20 characters.");
                         new android.os.Handler().postDelayed(
@@ -161,21 +163,13 @@ public class EditProfile extends DialogFragment {
                 String confirmpassValue = mConfirmpassword.getText().toString();
                 boolean nameStatus, emailStatus, confirmpassStatus;
 
-                for (int i=0; i<nameValue.length(); i++){
-                    if (!((nameValue.charAt(i) > 64 && nameValue.charAt(i) < 91) ||
-                            (nameValue.charAt(i) > 96 && nameValue.charAt(i) < 123) || nameValue.charAt(i) == 32)){
-                        flag = false;
-                        break;
-                    }
-                }
-
-                if (nameValue.length() == 0) {
-                    mNamevalidation.setText("Please enter a valid name.");
-                    nameStatus = false;
-                }else if (flag == false){
+                if (!nameValue.matches("[a-zA-Z.? ]*")){
                     mNamevalidation.setText("Special characters not allowed.");
                     nameStatus = false;
-                } else {
+                }else if (nameValue.length() == 0){
+                    mNamevalidation.setText("Please enter a valid name.");
+                    nameStatus = false;
+                }else {
                     mNamevalidation.setText("");
                     nameStatus = true;
                 }
@@ -212,6 +206,7 @@ public class EditProfile extends DialogFragment {
             @Override
             public void onClick(View view) {
                 dismiss();
+                dh.mDrawerLayout.openDrawer(Gravity.LEFT, false);
             }
         });
 

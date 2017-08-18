@@ -51,7 +51,6 @@
                 android:background="@drawable/border_bottom"
                 android:hint="Name"
                 android:inputType="textPersonName"
-                android:maxLength="20"
                 android:maxLines="1"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"

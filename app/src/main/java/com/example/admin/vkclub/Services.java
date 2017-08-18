@@ -16,12 +16,13 @@ import android.widget.Toast;
 
 public class Services extends AppCompatActivity {
     Button mReservation, mReception, mActivity, mPineviewkitchen, mMessageservice, mHousekeeping;
-
+    Dashboard dashboard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_services);
+        dashboard = (Dashboard) Dashboard.getAppContext();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -54,31 +55,51 @@ public class Services extends AppCompatActivity {
         mReception.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Welcome to Reception.", Toast.LENGTH_SHORT).show();
+                Intent in = new Intent(Services.this, Calling.class);
+                in.putExtra("STATE", "DAILING");
+                in.putExtra("CALLEE", "100235");
+                startActivity(in);
+                dashboard.initiateCall("100235");
             }
         });
         mActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Welcome to Activity.", Toast.LENGTH_SHORT).show();
+                Intent in = new Intent(Services.this, Calling.class);
+                in.putExtra("STATE", "DAILING");
+                in.putExtra("CALLEE", "100236");
+                startActivity(in);
+                dashboard.initiateCall("100236");
             }
         });
         mPineviewkitchen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Welcome to Pine View Kitchen.", Toast.LENGTH_SHORT).show();
+                Intent in = new Intent(Services.this, Calling.class);
+                in.putExtra("STATE", "DAILING");
+                in.putExtra("CALLEE", "100237");
+                startActivity(in);
+                dashboard.initiateCall("100237");
             }
         });
         mMessageservice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Welcome to Message Service.", Toast.LENGTH_SHORT).show();
+                Intent in = new Intent(Services.this, Calling.class);
+                in.putExtra("STATE", "DAILING");
+                in.putExtra("CALLEE", "100238");
+                startActivity(in);
+                dashboard.initiateCall("100238");
             }
         });
         mHousekeeping.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Welcome to Housekeeping.", Toast.LENGTH_SHORT).show();
+                Intent in = new Intent(Services.this, Calling.class);
+                in.putExtra("STATE", "DAILING");
+                in.putExtra("CALLEE", "100239");
+                startActivity(in);
+                dashboard.initiateCall("100239");
             }
         });
     }
