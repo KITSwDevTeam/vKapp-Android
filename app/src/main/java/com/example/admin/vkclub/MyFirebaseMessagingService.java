@@ -55,7 +55,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         mDataBaseHelper = new DataBaseHelper(getApplicationContext());
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
-        if (remoteMessage.getNotification().getTitle().length() != 0){
+        if (remoteMessage.getNotification().getTitle() != null){
             notificationBuilder.setContentTitle(remoteMessage.getNotification().getTitle());
             mDataBaseHelper.addNotificationData(remoteMessage.getNotification().getBody(), remoteMessage.getNotification().getTitle(), sendTime());
         }else {

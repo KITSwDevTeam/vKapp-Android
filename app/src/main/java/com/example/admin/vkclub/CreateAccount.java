@@ -1,6 +1,7 @@
 package com.example.admin.vkclub;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -32,6 +33,8 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.regex.Pattern;
+
 import static com.example.admin.vkclub.R.id.emailValidation;
 import static com.example.admin.vkclub.R.id.nameValidation;
 
@@ -52,6 +55,7 @@ public class CreateAccount extends AppCompatActivity {
     private static boolean nameStatus, emailStatus, passwordStatus, confirmpassStatus;
 
     static boolean flag;
+    private static ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,28 +103,22 @@ public class CreateAccount extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (name.getText().hashCode() == s.hashCode()){
-                    if (!s.toString().matches("[a-zA-Z.? ]*")){
-                        nameValidate.setText("Special characters not allowed.");
-                    }else if (s.length() == 0){
+                    if (s.length() == 0){
                         nameValidate.setText("Please enter your name.");
-                    }else if (s.length() == 20){
-                        nameValidate.setText("Allow only 20 characters.");
-                        new android.os.Handler().postDelayed(
-                                new Runnable() {
-                                    public void run() {
-                                        nameValidate.setText("");
-                                    }
-                                }, 3000);
+                    }else if (!s.toString().matches("[a-zA-Z.? ]*")){
+                        nameValidate.setText("Special characters not allowed.");
+                    }else if (s.length() >= 30){
+                        nameValidate.setText("Allow only 30 characters.");
                     }else {
                         nameValidate.setText("");
                     }
                 }else if (email.getText().hashCode() == s.hashCode()){
-                    if (s.toString().indexOf("@") <= 0){
+                    if (s.length() == 0){
+                        emailValidate.setText("Please provide your email address.");
+                    }else if (!isValidEmaillId(s.toString())){
                         emailValidate.setText("Please enter a valid email address.");
-                    }else if (s.length() == 0){
-                        nameValidate.setText("Please provide your email address.");
                     }else {
-                        nameValidate.setText("");
+                        emailValidate.setText("");
                     }
                 }else if (pass.getText().hashCode() == s.hashCode()){
                     if ((s.length() != 0) && s.length() < 6){
@@ -156,30 +154,25 @@ public class CreateAccount extends AppCompatActivity {
                 String passwordValue = pass.getText().toString().trim();
                 String confirmpassValue = confirmPass.getText().toString().trim();
 
-                for (int i=0; i<nameValue.length(); i++){
-                    if (!((nameValue.charAt(i) > 64 && nameValue.charAt(i) < 91) ||
-                            (nameValue.charAt(i) > 96 && nameValue.charAt(i) < 123) || nameValue.charAt(i) == 32)){
-                        flag = false;
-                        break;
-                    }
-                }
-
-                if (nameValue.length() == 0) {
+                if (nameValue.length() == 0){
                     nameValidate.setText("Please enter a valid name.");
                     nameStatus = false;
-                }else if (flag == false){
+                }else if (!nameValue.matches("[a-zA-Z.? ]*")){
                     nameValidate.setText("Special characters not allowed.");
                     nameStatus = false;
-                } else {
+                }else if (nameValue.length() >= 30){
+                    nameValidate.setText("Allow only 30 characters.");
+                    nameStatus = false;
+                }else {
                     nameValidate.setText("");
                     nameStatus = true;
                 }
 
-                if (emailValue.indexOf("@") <= 0) {
-                    emailValidate.setText("Please enter a valid email address.");
-                    emailStatus = false;
-                }else if (emailValue.length() == 0){
+                if (emailValue.length() == 0) {
                     emailValidate.setText("Please provide your email address.");
+                    emailStatus = false;
+                }else if (!isValidEmaillId(emailValue)){
+                    emailValidate.setText("Please enter a valid email address.");
                     emailStatus = false;
                 } else {
                     emailValidate.setText("");
@@ -213,8 +206,7 @@ public class CreateAccount extends AppCompatActivity {
     }
 
     private void createAccount(final String successEmail, final String successpassword,final String nameValue) {
-        spinner.setVisibility(View.VISIBLE);
-        statusText.setText("Processing...");
+        showProgressDialog("Processing...");
         mAuth.createUserWithEmailAndPassword(successEmail,successpassword).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -227,8 +219,7 @@ public class CreateAccount extends AppCompatActivity {
                     sendEmailVerification(user);
                     // create account success
                 } else {
-                    spinner.setVisibility(View.GONE);
-                    statusText.setText("");
+                    dismissProgressDialog();
                     if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                         // thrown if there already exists an account with the given email address
                         presentDialog("SignUp Failed..", "Account is already exists with the given email address.");
@@ -255,7 +246,8 @@ public class CreateAccount extends AppCompatActivity {
 
     //sent email to user verified
     private void sendEmailVerification(FirebaseUser user){
-        statusText.setText("Sending verification email... ");
+        dismissProgressDialog();
+        showProgressDialog("Sending verification email...");
         user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -271,6 +263,7 @@ public class CreateAccount extends AppCompatActivity {
     }
 
     private void afterSignUpDialog(String title, String msg){
+        dismissProgressDialog();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(msg);
@@ -305,5 +298,25 @@ public class CreateAccount extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void showProgressDialog(String message){
+        progressDialog = new ProgressDialog(CreateAccount.this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(message);
+        progressDialog.show();
+    }
+
+    private void dismissProgressDialog(){
+        progressDialog.dismiss();
+    }
+
+    private boolean isValidEmaillId(String email){
+        return Pattern.compile("^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$").matcher(email).matches();
     }
 }

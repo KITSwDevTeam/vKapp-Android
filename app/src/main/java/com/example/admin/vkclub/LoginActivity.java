@@ -56,6 +56,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
+
 import android.os.Handler;
 
 import static com.example.admin.vkclub.Calling.context;
@@ -119,10 +121,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (email.getText().hashCode() == s.hashCode()){
-                    if (s.toString().indexOf("@") <= 0){
-                        emailValidation.setText("Please enter a valid email address.");
-                    }else if (s.length() == 0){
+                    if (s.length() == 0){
                         emailValidation.setText("Please enter your email address.");
+                    }else if (!isValidEmaillId(s.toString())){
+                        emailValidation.setText("Please enter a valid email ");
                     }else {
                         emailValidation.setText("");
                     }
@@ -209,11 +211,11 @@ public class LoginActivity extends AppCompatActivity {
                 final String getEmail = email.getText().toString();
                 final String getPass = pass.getText().toString();
 
-                if (getEmail.indexOf("@") <= 0) {
-                    emailValidation.setText(getString(R.string.invalid_email));
-                    emailStatus = false;
-                }else if (getEmail.length() == 0){
+                if (getEmail.length() == 0) {
                     emailValidation.setText("Please enter your email address.");
+                    emailStatus = false;
+                }else if (!isValidEmaillId(getEmail)){
+                    emailValidation.setText(getString(R.string.invalid_email));
                     emailStatus = false;
                 }else {
                     emailValidation.setText("");
@@ -355,5 +357,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void dismissProgressDialog(){
         progressDialog.dismiss();
+    }
+
+    private boolean isValidEmaillId(String email){
+        return Pattern.compile("^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$").matcher(email).matches();
     }
 }

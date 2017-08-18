@@ -22,6 +22,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.regex.Pattern;
+
 public class ForgetPassword extends AppCompatActivity {
 
     // Declare Firebase Auth
@@ -61,10 +63,10 @@ public class ForgetPassword extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().indexOf("@") <= 0){
-                    emailValidate.setText("Please enter a valid email address.");
-                }else if (s.length() == 0){
+                if (s.length() == 0){
                     emailValidate.setText("Please provide your email address.");
+                }else if (!isValidEmaillId(s.toString())){
+                    emailValidate.setText("Please enter a valid email address.");
                 }else {
                     emailValidate.setText("");
                 }
@@ -87,11 +89,11 @@ public class ForgetPassword extends AppCompatActivity {
                 String emailValue = email.getText().toString();
                 boolean emailStatus;
 
-                if ((emailValue.indexOf("@") <= 0)) {
-                    emailValidate.setText("Please enter a valid email address.");
-                    emailStatus = false;
-                }else if (emailValue.length() == 0){
+                if (emailValue.length() == 0) {
                     emailValidate.setText("Please enter your email address.");
+                    emailStatus = false;
+                }else if (!isValidEmaillId(emailValue)){
+                    emailValidate.setText("Please enter a valid email address.");
                     emailStatus = false;
                 } else {
                     emailValidate.setText("");
@@ -158,5 +160,14 @@ public class ForgetPassword extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private boolean isValidEmaillId(String email){
+        return Pattern.compile("^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$").matcher(email).matches();
     }
 }
