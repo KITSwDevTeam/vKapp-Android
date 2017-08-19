@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:textSize="10dp"
-            android:textColor="@color/colorRed"
+            android:textColor="@color/colorYellow"
             android:textStyle="italic"
             android:id="@+id/emailvalidation"/>
 
@@ -67,7 +67,7 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:textSize="10dp"
-            android:textColor="@color/colorRed"
+            android:textColor="@color/colorYellow"
             android:textStyle="italic"
             android:id="@+id/passvalidation"/>
 
@@ -80,13 +80,6 @@
             android:textColor="@color/colorWhite"
             android:layout_marginTop="10dp"
             android:id="@+id/forgetpass"/>
-
-        <ProgressBar
-            android:id="@+id/progressBar1"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="50dp"
-            android:layout_height="31dp"
-            android:layout_centerHorizontal="true" />
 
         <Button
             android:layout_width="match_parent"

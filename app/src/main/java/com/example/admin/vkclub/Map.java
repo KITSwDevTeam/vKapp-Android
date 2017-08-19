@@ -1,10 +1,21 @@
 package com.example.admin.vkclub;
 
 
+import android.*;
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -34,6 +45,10 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
     private static final LatLng KIRIROM = new LatLng(11.3167, 104.0651);
     private GoogleMap mMap;
     SupportMapFragment mFragment;
+    Marker mCurrLocation;
+    LatLng latLng;
+    private static Context mapContext;
+    private static Activity mapActivity;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -41,6 +56,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        mapContext = this;
+        mapActivity = this;
 
         if (Build.VERSION.SDK_INT >= 21) {
             Window window = this.getWindow();
@@ -268,7 +285,93 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
             return;
         }
         mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                LocationManager locationService = (LocationManager) getSystemService(LOCATION_SERVICE);
+                boolean locationServiceEnabled = locationService.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                if (locationServiceEnabled){
+                    if (Build.VERSION.SDK_INT >= 23 &&
+                            ContextCompat.checkSelfPermission(mapContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                            ContextCompat.checkSelfPermission(mapContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                        ActivityCompat.requestPermissions(mapActivity, new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                        }, 100);
+                    }
+                }else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mapContext);
+                    builder.setTitle("Location provider disabled");
+                    builder.setMessage("Vkclub cannot identify your current location due to location provider disabled\n" +
+                            "Would you like to enable it ?");
+                    builder.setCancelable(true);
+                    builder.setPositiveButton(
+                            "Enable",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(i);
+                                }
+                            });
+
+                    builder.setNegativeButton(
+                            "Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+                return false;
+            }
+        });
+//
+//        buildGoogleApiClient();
+//
+//        mGoogleApiClient.connect();
+
+
+
+
+
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100 && grantResults.length > 0){
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED && grantResults[1] != PackageManager.PERMISSION_GRANTED){
+                AlertDialog.Builder builder = new AlertDialog.Builder(mapContext);
+                builder.setTitle("Location permission denied.");
+                builder.setMessage("Vkclub cannot obtain your current location without this permissions.");
+                builder.setCancelable(true);
+                builder.setNegativeButton(
+                        "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
+        }
+    }
+
+    //    protected synchronized void buildGoogleApiClient() {
+////        Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
+//        mGoogleApiClient = new GoogleApiClient.Builder(this)
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this)
+//                .addApi(LocationServices.API)
+//                .build();
+//    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

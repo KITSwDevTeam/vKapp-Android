@@ -17,6 +17,7 @@
             android:background="@color/colorWhite"
             android:textIsSelectable="true"
             android:gravity="center"
+            android:hint="Enter phone number"
             android:textSize="20dp"
             android:textStyle="bold"/>
 

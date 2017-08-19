@@ -1,9 +1,11 @@
 package com.example.admin.vkclub;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.sip.SipAudioCall;
 import android.net.sip.SipException;
 import android.net.sip.SipManager;
@@ -48,6 +50,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = this;
+
+//        PackageManager pm = getApplicationContext().getPackageManager();
+//        ComponentName componentName = new ComponentName(MainActivity.this, MyFirebaseMessagingService.class);
+//        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
 
         if(Build.VERSION.SDK_INT >= 21){
             Window window = this.getWindow();

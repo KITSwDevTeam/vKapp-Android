@@ -54,6 +54,22 @@
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>
+    
+    <style name="ProgressBar" parent="@android:style/Widget.ProgressBar">
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:visibility">gone</item>
+        <item name="android:background">@color/colorBackground</item>
+        <item name="android:indeterminateDrawable">@drawable/circular_progress_dialog</item>
+    </style>
+
+    <style name="FullyTranslucent" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:progressBarStyle">@style/InvisibleProgress</item>
+    </style>
+
+    <style name="InvisibleProgress">
+        <item name="android:visibility">gone</item>
+    </style>
 
     <style name="MySwitch" parent="Theme.AppCompat.Light">
         <!-- active thumb & track color (30% transparency) -->

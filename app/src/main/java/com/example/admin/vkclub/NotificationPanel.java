@@ -11,11 +11,15 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -29,6 +33,7 @@ public class NotificationPanel extends DialogFragment {
     Toolbar toolbar;
     private static final String TAG = "NotificationPanel";
     private ListView mListView;
+    private TextView noItems;
 
     DataBaseHelper mDataBaseHelper;
 
@@ -54,6 +59,21 @@ public class NotificationPanel extends DialogFragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        getActivity().getMenuInflater().inflate(R.menu.menu_notification, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.clear_notification){
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         populateListView();
@@ -61,10 +81,14 @@ public class NotificationPanel extends DialogFragment {
 
     private void findView(View view){
         mListView = (ListView)view.findViewById(R.id.notification_panel);
+        noItems = (TextView)view.findViewById(R.id.no_item);
+
         mDataBaseHelper = new DataBaseHelper(getContext());
         NotificationPanel.returnDbHelper = mDataBaseHelper;
         dashboard = (Dashboard) Dashboard.getAppContext();
 
+        noItems.bringToFront();
+        noItems.setVisibility(View.GONE);
         populateListView();
     }
 
@@ -86,6 +110,10 @@ public class NotificationPanel extends DialogFragment {
 
         for (int j=0; j<data.getCount(); j++){
             listData.add(listDataTemp[j]);
+        }
+
+        if (listData.size() == 0){
+            noItems.setVisibility(View.VISIBLE);
         }
 
         //instantiate custom adapter

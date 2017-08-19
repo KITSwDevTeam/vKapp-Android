@@ -51,7 +51,6 @@
                 android:background="@drawable/border_bottom"
                 android:hint="Name"
                 android:inputType="textPersonName"
-                android:maxLength="20"
                 android:maxLines="1"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
@@ -63,7 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:textColor="@color/colorRed"
+                android:textColor="@color/colorYellow"
                 android:textSize="10dp"
                 android:textStyle="italic"/>
 
@@ -86,7 +85,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:textColor="@color/colorRed"
+                android:textColor="@color/colorYellow"
                 android:textSize="10dp"
                 android:textStyle="italic"/>
 
@@ -109,7 +108,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:textColor="@color/colorRed"
+                android:textColor="@color/colorYellow"
                 android:textSize="10dp"
                 android:textStyle="italic"/>
 
@@ -132,7 +131,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:textColor="@color/colorRed"
+                android:textColor="@color/colorYellow"
                 android:textSize="10dp"
                 android:textStyle="italic"/>
 

@@ -67,7 +67,7 @@ public class NotificationItem extends BaseAdapter implements ListAdapter {
 
         TextView notificaitonMessage = (TextView) view.findViewById(R.id.notification_message);
         TextView notificationTitle = (TextView) view.findViewById(R.id.notification_title);
-        TextView notificationTime = (TextView) view.findViewById(R.id.notification_time);
+//        TextView notificationTime = (TextView) view.findViewById(R.id.notification_time);
 
         Cursor data = mDataBaseHelper.getNotificationData();
         message = new String[data.getCount()];
@@ -86,7 +86,7 @@ public class NotificationItem extends BaseAdapter implements ListAdapter {
             if (position == j){
                 notificaitonMessage.setText(message[j]);
                 notificationTitle.setText(title[j]);
-                notificationTime.setText(sendTime[j]);
+//                notificationTime.setText(sendTime[j]);
             }
         }
 

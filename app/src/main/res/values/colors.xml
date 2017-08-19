@@ -12,7 +12,7 @@
     <color name="goldenrod">#daa520</color>
     <color name="sample">#1A6930</color>
     <color name="darker_white">#F2F3F4</color>
-
+    <color name="colorYellow">#FFFF00</color>
     <color name="black_overlay">#66000000</color>
 
     <!-- dots inactive colors -->

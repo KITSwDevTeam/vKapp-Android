@@ -60,8 +60,6 @@ public class UpdatePassword extends DialogFragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getContext(),Dashboard.class);
-                startActivity(i);
                 dismiss();
             }
         });

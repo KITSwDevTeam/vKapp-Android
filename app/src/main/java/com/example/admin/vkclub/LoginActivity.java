@@ -1,6 +1,7 @@
 package com.example.admin.vkclub;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,8 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -35,17 +38,26 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.FacebookAuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthActionCodeException;
+import com.google.firebase.auth.FirebaseAuthEmailException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseAuthProvider;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.ProviderQueryResult;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
+
 import android.os.Handler;
 
 import static com.example.admin.vkclub.Calling.context;
@@ -61,13 +73,13 @@ public class LoginActivity extends AppCompatActivity {
     // TextView Declaration
     private TextView emailValidation, passValidation;
     private int submitAttempt = 0;
-    private ProgressBar spinner;
     private CallbackManager callbackManager;
     SharedPreferences preference;
     SharedPreferences.Editor editor;
     String currentpass;
     private static Context context;
-
+    private static ProgressDialog progressDialog;
+    private TextWatcher editTextWatcher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +93,6 @@ public class LoginActivity extends AppCompatActivity {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorStatusBar));
         }
-
-        spinner = (ProgressBar)findViewById(R.id.progressBar1);
-        spinner.setVisibility(View.GONE);
 
         // Instantiate buttons
         signin = (Button)findViewById(R.id.signin);
@@ -105,27 +114,66 @@ public class LoginActivity extends AppCompatActivity {
         // call sign in function
         signIn(signin);
 
+        editTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (email.getText().hashCode() == s.hashCode()){
+                    if (s.length() == 0){
+                        emailValidation.setText("Please enter your email address.");
+                    }else if (!isValidEmaillId(s.toString())){
+                        emailValidation.setText("Please enter a valid email ");
+                    }else {
+                        emailValidation.setText("");
+                    }
+                }else {
+                    if ((s.length() != 0) && (s.length() < 6)){
+                        passValidation.setText("Please provide at least 6 characters.");
+                    }else if (s.length() == 0){
+                        passValidation.setText("Please provide your password.");
+                    }else {
+                        passValidation.setText("");
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+        email.addTextChangedListener(editTextWatcher);
+        pass.addTextChangedListener(editTextWatcher);
+
         // Initialize facebook login button
         callbackManager = CallbackManager.Factory.create();
         LoginButton loginButton = (LoginButton)findViewById(R.id.facebookLoginbtn);
         loginButton.setReadPermissions("email", "public_profile");
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showProgressDialog("Authenticating...");
+            }
+        });
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
+                dismissProgressDialog();
+                showProgressDialog("Loading...");
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
             public void onCancel() {
                 Log.d(TAG, "facebook:onCancel");
-                // ...
+                dismissProgressDialog();
             }
 
             @Override
             public void onError(FacebookException error) {
                 Log.d(TAG, "facebook:onError", error);
-                // ...
+                dismissProgressDialog();
             }
         });
     }
@@ -133,7 +181,7 @@ public class LoginActivity extends AppCompatActivity {
     private void handleFacebookAccessToken(AccessToken accessToken) {
         Log.d(TAG, "handleFacebookAccessToken:" + accessToken);
 
-        AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
+        final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         mAuth.signInWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -144,10 +192,12 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    // If sign in fails, display a message to the user.
-                    Log.w(TAG, "signInWithCredential:failure", task.getException());
-                    Toast.makeText(LoginActivity.this, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show();
+                    dismissProgressDialog();
+                    try {
+                        throw task.getException();
+                    }catch (Exception e){
+                        presentDialog("Login Failed..", e.getMessage());
+                    }
                 }
             }
         });
@@ -161,11 +211,11 @@ public class LoginActivity extends AppCompatActivity {
                 final String getEmail = email.getText().toString();
                 final String getPass = pass.getText().toString();
 
-                if ((getEmail.indexOf("@") <= 0) || getEmail.length() == 0) {
-                    emailValidation.setText(getString(R.string.invalid_email));
-                    emailStatus = false;
-                }else if (getEmail.length() == 0){
+                if (getEmail.length() == 0) {
                     emailValidation.setText("Please enter your email address.");
+                    emailStatus = false;
+                }else if (!isValidEmaillId(getEmail)){
+                    emailValidation.setText(getString(R.string.invalid_email));
                     emailStatus = false;
                 }else {
                     emailValidation.setText("");
@@ -181,48 +231,59 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 if (emailStatus && passStatus) {
-                    spinner.setVisibility(View.VISIBLE);
-                    mAuth.signInWithEmailAndPassword(getEmail, getPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    showProgressDialog("Authenticating...");
+                    mAuth.fetchProvidersForEmail(getEmail).addOnCompleteListener(new OnCompleteListener<ProviderQueryResult>() {
                         @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                FirebaseUser mUser = mAuth.getCurrentUser();
+                        public void onComplete(@NonNull Task<ProviderQueryResult> task) {
+                            if (task.getResult().getProviders().size() == 1 && task.getResult().getProviders().get(0).equals("facebook.com")){
+                                dismissProgressDialog();
+                                presentDialog("Login Failed..", "An account already exists with the same email address " +
+                                        "but different sign-in credentials. Sign in using a provider associated with this email address.");
+                            }else {
+                                mAuth.signInWithEmailAndPassword(getEmail, getPass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<AuthResult> task) {
+                                        if (task.isSuccessful()) {
+                                            FirebaseUser mUser = mAuth.getCurrentUser();
 
-                                preference = PreferenceManager.getDefaultSharedPreferences(context);
-                                editor = preference.edit();
-                                editor.putString("pass", getPass);
-                                editor.commit();
+                                            preference = PreferenceManager.getDefaultSharedPreferences(context);
+                                            editor = preference.edit();
+                                            editor.putString("pass", getPass);
+                                            editor.commit();
 
-                                boolean emailVerified = mUser.isEmailVerified();
-                                System.out.println("Email Verified :::::::::::::::   " + emailVerified );
-                                if (emailVerified){
-                                    Intent intent =  new Intent(LoginActivity.this, Dashboard.class);
-                                    startActivity(intent);
-                                    finish();
-                                }else {
-                                    spinner.setVisibility(View.GONE);
-                                    presentDialog("Please verify your email address!", "Check email sent to " + getEmail + " for verification link.\nThank you for using Vkclub.");
-                                }
-                            } else {
-                                spinner.setVisibility(View.GONE);
-                                if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                                    // Invalid password
-                                    presentDialog("Login Failed..", "Invalid Password");
-                                    preventSpam(submitAttempt++);
-                                } else if (task.getException() instanceof FirebaseAuthInvalidUserException) {
-                                    // Invalid Email id
-                                    presentDialog("Login Failed..", "Invalid Email");
-                                    preventSpam(submitAttempt++);
-                                } else if (task.getException() instanceof FirebaseNetworkException) {
-                                    // No internet Connection
-                                    presentDialog("Login Failed..", "No network coverage");
-                                } else {
-                                    try {
-                                        throw task.getException();
-                                    } catch (Exception e) {
-                                        presentDialog("Login Failed..", e.getMessage());
+                                            boolean emailVerified = mUser.isEmailVerified();
+                                            System.out.println("Email Verified :::::::::::::::   " + emailVerified );
+                                            if (emailVerified){
+                                                Intent intent =  new Intent(LoginActivity.this, Dashboard.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }else {
+                                                dismissProgressDialog();
+                                                presentDialog("Please verify your email address!", "Check email sent to " + getEmail + " for verification link.\nThank you for using Vkclub.");
+                                            }
+                                        } else {
+                                            progressDialog.dismiss();
+                                            if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                                                // Invalid password
+                                                presentDialog("Login Failed..", "Invalid Password");
+                                                preventSpam(submitAttempt++);
+                                            }else if (task.getException() instanceof FirebaseAuthInvalidUserException) {
+                                                // Invalid Email id
+                                                presentDialog("Login Failed..", "Invalid Email");
+                                                preventSpam(submitAttempt++);
+                                            }else if (task.getException() instanceof FirebaseNetworkException) {
+                                                // No internet Connection
+                                                presentDialog("Login Failed..", "No network coverage");
+                                            }else {
+                                                try {
+                                                    throw task.getException();
+                                                } catch (Exception e) {
+                                                    presentDialog("Login Failed..", e.getMessage());
+                                                }
+                                            }
+                                        }
                                     }
-                                }
+                                });
                             }
                         }
                     });
@@ -232,11 +293,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void preventSpam(int att) {
-        if (att < 5) {
-            Toast.makeText(LoginActivity.this, "Login Attempt " + submitAttempt, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(LoginActivity.this, "You cannot login anymore...", Toast.LENGTH_SHORT).show();
-        }
+//        if (att < 5) {
+//            Toast.makeText(LoginActivity.this, "Login Attempt " + submitAttempt, Toast.LENGTH_SHORT).show();
+//        } else {
+//            Toast.makeText(LoginActivity.this, "You cannot login anymore...", Toast.LENGTH_SHORT).show();
+//        }
     }
 
     private void presentDialog(String title, String msg) {
@@ -285,5 +346,25 @@ public class LoginActivity extends AppCompatActivity {
 
         // Pass the activity result back to the Facebook SDK
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void showProgressDialog(String message){
+        progressDialog = new ProgressDialog(LoginActivity.this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(message);
+        progressDialog.show();
+    }
+
+    private void dismissProgressDialog(){
+        progressDialog.dismiss();
+    }
+
+    private boolean isValidEmaillId(String email){
+        return Pattern.compile("^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$").matcher(email).matches();
     }
 }

@@ -5,33 +5,55 @@
     android:paddingTop="10dp"
     android:paddingBottom="10dp">
 
-    <ImageView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:paddingLeft="8dp"
-        android:id="@+id/app_icon"
-        android:src="@mipmap/ic_launcher"/>
+        android:weightSum="10">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/app_icon"
-        android:layout_marginLeft="10dp">
-
-        <TextView
+        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:id="@+id/notification_title"/>
+            android:id="@+id/app_icon"
+            android:src="@mipmap/ic_launcher"
+            android:layout_weight="0"/>
 
-        <TextView
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="8">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20dp"
+                android:text="Notification Item"
+                android:id="@+id/notification_title"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:id="@+id/notification_message"/>
+        </LinearLayout>
+
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/notification_message" />
+            android:text="View"
+            android:background="@null"
+            android:textColor="@color/colorBackground"
+            android:textAllCaps="false"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="2"/>
+
     </LinearLayout>
 
     <TextView

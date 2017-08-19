@@ -82,7 +82,39 @@ public class Dailer extends Fragment{
         callBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (dashboard.reg_status == 1){
+                if (numEditor.getText().toString().length() == 0){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Call Failure");
+                    builder.setMessage("Please enter phone number.");
+                    builder.setCancelable(true);
+
+                    builder.setPositiveButton(
+                            "Yes",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }else if (numEditor.getText().toString().equals(dashboard.sipUsername)){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Call Failure");
+                    builder.setMessage("You cannot make a call to your own number.");
+                    builder.setCancelable(true);
+
+                    builder.setPositiveButton(
+                            "Yes",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                } else if (dashboard.reg_status == 1){
                     call();
                 }else if (dashboard.reg_status == 2){
                     sipSessionError();

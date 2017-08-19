@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -19,6 +21,8 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.regex.Pattern;
 
 public class ForgetPassword extends AppCompatActivity {
 
@@ -34,6 +38,8 @@ public class ForgetPassword extends AppCompatActivity {
     // Declare TextView
     TextView emailValidate;
 
+    TextWatcher emailWatcher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +47,7 @@ public class ForgetPassword extends AppCompatActivity {
 
         submitBtn = (Button)findViewById(R.id.submit);
         backBtn = (Button)findViewById(R.id.backBtn);
-
         email = (EditText)findViewById(R.id.email);
-
         emailValidate = (TextView)findViewById(R.id.emailValidation);
 
         if(Build.VERSION.SDK_INT >= 21){
@@ -53,20 +57,42 @@ public class ForgetPassword extends AppCompatActivity {
             window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorStatusBar));
         }
 
+        emailWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 0){
+                    emailValidate.setText("Please provide your email address.");
+                }else if (!isValidEmaillId(s.toString())){
+                    emailValidate.setText("Please enter a valid email address.");
+                }else {
+                    emailValidate.setText("");
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        email.addTextChangedListener(emailWatcher);
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
-
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String emailValue = email.getText().toString();
                 boolean emailStatus;
 
-                if ((emailValue.indexOf("@") <= 0) || !emailValue.contains(".com") || emailValue.isEmpty()) {
+                if (emailValue.length() == 0) {
+                    emailValidate.setText("Please enter your email address.");
+                    emailStatus = false;
+                }else if (!isValidEmaillId(emailValue)){
                     emailValidate.setText("Please enter a valid email address.");
                     emailStatus = false;
                 } else {
@@ -86,10 +112,7 @@ public class ForgetPassword extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    presentDialog("Send Success", "Please check your email address for the confirmation link.");
-                    Intent intent = new Intent(ForgetPassword.this, LoginActivity.class);
-                    startActivity(intent);
-                    finish();
+                    afterForgetPasswordDialog("Send Success", "Please check your email address for the confirmation link.");
                 } else {
                     try {
                         throw task.getException();
@@ -117,5 +140,34 @@ public class ForgetPassword extends AppCompatActivity {
 
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    private void afterForgetPasswordDialog(String title, String msg){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(msg);
+        builder.setCancelable(true);
+
+        builder.setPositiveButton(
+                "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Intent intent = new Intent(ForgetPassword.this, LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private boolean isValidEmaillId(String email){
+        return Pattern.compile("^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
+                + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
+                + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
+                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
+                + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$").matcher(email).matches();
     }
 }
