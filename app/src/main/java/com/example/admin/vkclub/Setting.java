@@ -11,7 +11,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -19,14 +18,13 @@ import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class Setting extends AppCompatActivity {
 
     private TextView mHelp;
-    private Switch msetting, mNotification;
-    SharedPreferences preference,prefs;
-    SharedPreferences.Editor editor,editors;
+    private Switch msetting;
+    SharedPreferences prefs,shareprefs;
+    SharedPreferences.Editor editor;
     Boolean isFirstLaunch,istrue;
 
     @Override
@@ -35,7 +33,6 @@ public class Setting extends AppCompatActivity {
         setContentView(R.layout.activity_setting);
 
         msetting = (Switch) findViewById(R.id.settingbtn);
-        mNotification = (Switch) findViewById(R.id.locationbtn);
         mHelp = (TextView) findViewById(R.id.help);
 
         ActionBar actionBar = getSupportActionBar();
@@ -50,20 +47,11 @@ public class Setting extends AppCompatActivity {
         }
 
         //set switch on as defaults
-        preference = PreferenceManager.getDefaultSharedPreferences(Setting.this);
-        isFirstLaunch = preference.getBoolean("noti_setting", false);
-        Log.i("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",isFirstLaunch.toString());
+        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+        shareprefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+        isFirstLaunch = shareprefs.getBoolean("noti_setting", false);
         if (isFirstLaunch){
-//            if(istrue = prefs.getBoolean("isTrue",true)){
-//                msetting.setChecked(true);
-//            }else if(istrue = prefs.getBoolean("isTrue",false)){
-//                msetting.setChecked(false);
-//            }else {
-//
-//            }
-            prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
             istrue = prefs.getBoolean("isTrue",false);
-            Log.i("IIIIIIIIIIIIIIIIIIIIIIIIII",istrue.toString());
             if(istrue==true){
                 msetting.setChecked(true);
             }else {
@@ -74,75 +62,38 @@ public class Setting extends AppCompatActivity {
                 public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                     if(msetting.isChecked()){
                         msetting.setChecked(true);
-                        Log.i("+++++++++++++++++++++++++++++++++",msetting.toString());
-
-                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
-                        editors = prefs.edit();
-                        editors.putBoolean("isTrue", true);
-                        editors.commit();
-
-                        PackageManager pm = getApplicationContext().getPackageManager();
-                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
-                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                        sharepreference(true);
+                        toggleNotification( PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
                     }else {
                         msetting.setChecked(false);
-                        Log.i("------------------------------------",msetting.toString());
-
-                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
-                        editors = prefs.edit();
-                        editors.putBoolean("isTrue", false);
-                        editors.commit();
-
-                        PackageManager pm = getApplicationContext().getPackageManager();
-                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
-                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                        sharepreference(false);
+                        toggleNotification(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
                     }
                 }
             });
         }else {
-            editor = preference.edit();
+            editor = shareprefs.edit();
             editor.putBoolean("noti_setting", true);
             editor.commit();
 
             msetting.setChecked(true);
-            prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
-            editors = prefs.edit();
-            editors.putBoolean("isTrue", true);
-            editors.commit();
+            sharepreference(true);
+            toggleNotification(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
             msetting.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                     if(b==true){
-
-                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
-                        editors = prefs.edit();
-                        editors.putBoolean("isTrue",true);
-                        Log.i("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV",editor.toString());
-                        editors.commit();
-                        PackageManager pm = getApplicationContext().getPackageManager();
-                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
-                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                        msetting.setChecked(true);
+                        sharepreference(true);
+                        toggleNotification(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
                     }else {
-                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
-                        editors = prefs.edit();
-                        editors.putBoolean("isTrue",false);
-                        Log.i("PPPPPPPPPPPPPPPPPPPPPPPPPPP",editor.toString());
-                        editors.commit();
-                        PackageManager pm = getApplicationContext().getPackageManager();
-                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
-                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                        msetting.setChecked(false);
+                        sharepreference(false);
+                        toggleNotification(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
                     }
                 }
             });
-
-
-            Log.i("*********************",msetting.toString());
-            PackageManager pm = getApplicationContext().getPackageManager();
-            ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
-            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
-
         }
-
 
         //Help Alert
         mHelp.setOnClickListener(new View.OnClickListener() {
@@ -152,6 +103,18 @@ public class Setting extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void toggleNotification(int state){
+        PackageManager pm = getApplicationContext().getPackageManager();
+        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
+        pm.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
+    }
+
+    public void sharepreference(boolean onOff){
+        editor = prefs.edit();
+        editor.putBoolean("isTrue",onOff);
+        editor.commit();
     }
 
     public void presentDialog(String title, String msg) {
