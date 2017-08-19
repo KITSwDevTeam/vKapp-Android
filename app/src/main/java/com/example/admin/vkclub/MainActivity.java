@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
                         for (UserInfo profile : user.getProviderData()) {
                             // Id of the provider (ex: google.com)
                             String providerId = profile.getProviderId();
-                            System.out.println("lllllllllllllllllllllllllllllllllllllllll   " + providerId);
                             if (providerId.equals("facebook.com")){
                                 navigate(Dashboard.class);
                             }else {

@@ -2,7 +2,6 @@ package com.example.admin.vkclub;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,7 +13,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -24,47 +22,33 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.facebook.login.LoginManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
-
-import static com.example.admin.vkclub.Calling.context;
 import com.google.firebase.auth.UserProfileChangeRequest;
-
-import java.security.PrivateKey;
-
-import static com.bumptech.glide.gifdecoder.GifHeaderParser.TAG;
-import static com.example.admin.vkclub.Calling.getInstance;
-import static com.example.admin.vkclub.R.id.email;
-import static com.example.admin.vkclub.R.id.pass;
-import static com.example.admin.vkclub.R.id.start;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class EditProfile extends DialogFragment {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private DialogInterface.OnDismissListener onDismissListener;
-
     Toolbar toolbar;
-    private EditText mName,mEmail,mConfirmpassword,mCurrentpass;
-    private TextView mNamevalidation,mEmailvalidation,mConfirmpassvalidation,mUpdatepass;
-    private Button Updateprofile;
     FirebaseUser user;
     SharedPreferences preference;
-
+    private DialogInterface.OnDismissListener onDismissListener;
+    private EditText mName,mEmail,mConfirmpassword;
+    private TextView mNamevalidation,mEmailvalidation,mConfirmpassvalidation,mUpdatepass;
+    private Button Updateprofile;
+    private static boolean nameStatus, emailStatus, confirmpassStatus;
 
 
     @Nullable
@@ -74,14 +58,12 @@ public class EditProfile extends DialogFragment {
         findView(view);
         return view;
     }
-
     private void findView(View view) {
         toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         mName = (EditText) view.findViewById(R.id.nameprofile);
         mEmail = (EditText) view.findViewById(R.id.email1);
         mConfirmpassword = (EditText) view.findViewById(R.id.confirmpass1);
         Updateprofile = (Button) view.findViewById(R.id.updateprofile);
-        mCurrentpass = (EditText) view.findViewById(pass);
         mUpdatepass = (TextView) view.findViewById(R.id.updatepass);
 
         mNamevalidation = (TextView) view.findViewById(R.id.nameValidation1);
@@ -89,8 +71,6 @@ public class EditProfile extends DialogFragment {
         mConfirmpassvalidation = (TextView) view.findViewById(R.id.confirmpassValidation);
 
         //get name and email info of user from firebase
-
-
         user = mAuth.getCurrentUser();
         mName.setText(user.getDisplayName());
         mEmail.setText(user.getEmail());
@@ -109,7 +89,22 @@ public class EditProfile extends DialogFragment {
                 String nameValue = mName.getText().toString();
                 final String emailValue = mEmail.getText().toString();
                 String confirmpassValue = mConfirmpassword.getText().toString();
-                boolean nameStatus, emailStatus, confirmpassStatus;
+
+                for (int i=0; i<nameValue.length(); i++){
+                    if (!((nameValue.charAt(i) > 64 && nameValue.charAt(i) < 91) ||
+                            (nameValue.charAt(i) > 96 && nameValue.charAt(i) < 123) || nameValue.charAt(i) == 32)){
+                        mNamevalidation.setText("Special characters not allowed.");
+                        new android.os.Handler().postDelayed(
+                                new Runnable() {
+                                    public void run() {
+                                        mNamevalidation.setText("");
+                                    }
+                                }, 4000);
+                        nameStatus = false;
+                    }else {
+                        nameStatus = true;
+                    }
+                }
 
                 if(nameValue.isEmpty()){
                     mNamevalidation.setText("Please enter your name.");
@@ -313,10 +308,6 @@ public class EditProfile extends DialogFragment {
             transaction.add(R.id.drawerLayout, newFragment)
                     .addToBackStack(null).commit();
         }
-    }
-
-    public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
-        this.onDismissListener = onDismissListener;
     }
 
     @Override

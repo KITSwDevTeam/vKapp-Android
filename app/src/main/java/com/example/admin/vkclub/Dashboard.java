@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.graphics.Matrix;
 import android.media.Image;
 import android.media.MediaPlayer;
@@ -169,6 +170,7 @@ public class Dashboard extends AppCompatActivity {
     FirebaseStorage storage;
     Uri uri;
     DbBitmapUtility dbBitmapUtility;
+    Boolean isFirstLaunch;
 
 
     public Voip voipClient;
@@ -203,7 +205,9 @@ public class Dashboard extends AppCompatActivity {
     public static boolean sipPermission;
     DataBaseHelper mDataBaseHelper;
 
-    SharedPreferences prefs;
+    private SharedPreferences preferences,prefs,preference;
+    SharedPreferences.Editor editor;
+
     String imageBlob;
     public static Activity dashboardActivity;
     NotificationManager mNotifyManager;
@@ -308,6 +312,8 @@ public class Dashboard extends AppCompatActivity {
             }
         });
 
+
+
         // upcoming module
         upComingModule(membershipBtn, "membership");
 
@@ -376,6 +382,22 @@ public class Dashboard extends AppCompatActivity {
             });
 
             //setting
+
+//            preferences = PreferenceManager.getDefaultSharedPreferences(context);
+//            isFirstLaunch = preferences.getBoolean("FirstLaunch", false);
+//            if (isFirstLaunch){
+//                presentDialog("notification is on","Thanks!");
+//            }else {
+//                presentDialog("Notification is off","Thanks !");
+//                editor = preferences.edit();
+//                editor.putBoolean("FirstLaunch", true);
+//                editor.commit();
+//                //user get notification
+//                PackageManager pm = getApplicationContext().getPackageManager();
+//                ComponentName componentName = new ComponentName(Dashboard.this, MyFirebaseMessagingService.class);
+//                pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+//            }
+
             mSetting.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

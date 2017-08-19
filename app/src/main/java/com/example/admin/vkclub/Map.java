@@ -2,9 +2,7 @@ package com.example.admin.vkclub;
 
 
 import android.annotation.TargetApi;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,23 +11,15 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
@@ -42,13 +32,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final LatLng KIRIROM = new LatLng(11.3167, 104.0651);
-//    private static final String TAG = "hello";
     private GoogleMap mMap;
-    GoogleApiClient mGoogleApiClient;
     SupportMapFragment mFragment;
-    Marker mCurrLocation;
-    LatLng latLng;
-    public IncomingCallReceiver callReceiver = new IncomingCallReceiver();
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -67,12 +52,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
         getSupportActionBar().setTitle("Map");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-        // Get the SupportMapFragment and request notification
-        // when the map is ready to be used.
-//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-//        mapFragment.getMapAsync(this);
-
         mFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mFragment.getMapAsync(this);
     }
@@ -80,28 +59,15 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
-        // Move the camera instantly to Sydney with a zoom of 15.
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(KIRIROM, 15));
 
-        // Zoom in, animating the camera.
-//        googleMap.animateCamera(CameraUpdateFactory.zoomIn());
-
-        // Zoom out to zoom level 10, animating with a duration of 2 seconds.
-//        googleMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
-
-        // Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(KIRIROM)      // Sets the center of the map to Mountain View
                 .zoom(15)                   // Sets the zoom
-//               .bearing(90)                // Sets the orientation of the camera to east
-//                . tilt(30)                   // Sets the tilt of the camera to 30 degrees
                 .build();                   // Creates a CameraPosition from the builder
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         //set maxzoom of the map
         mMap.setMaxZoomPreference(17.0f);
         //Add GroundOverlay
-
-//        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.drawable.map_s);
 
         LatLngBounds latlngBounds = new LatLngBounds(
                 new LatLng(11.3040, 104.0324),
@@ -112,7 +78,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
                 .positionFromBounds(latlngBounds);
 
         mMap.addGroundOverlay(groundOverlayOptions);
-
 
         //Add marker
         map.addMarker(new MarkerOptions()
@@ -303,27 +268,7 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
             return;
         }
         mMap.setMyLocationEnabled(true);
-//
-//        buildGoogleApiClient();
-//
-//        mGoogleApiClient.connect();
-
-
-
-
-
     }
-
-
-//    protected synchronized void buildGoogleApiClient() {
-////        Toast.makeText(this, "buildGoogleApiClient", Toast.LENGTH_SHORT).show();
-//        mGoogleApiClient = new GoogleApiClient.Builder(this)
-//                .addConnectionCallbacks(this)
-//                .addOnConnectionFailedListener(this)
-//                .addApi(LocationServices.API)
-//                .build();
-//    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -336,22 +281,8 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
         }
     }
 
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-//        Toast.makeText(this, "onConnected", Toast.LENGTH_SHORT).show();
-//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//            return;
-//        }
-//        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-//                mGoogleApiClient);
-//        if (mLastLocation != null) {
-//            //place marker at current position
-//            mMap.clear();
-//            latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-//
-//    }
-
 
     }
 
@@ -363,16 +294,6 @@ public class Map extends AppCompatActivity implements OnMapReadyCallback,
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-//        //remove previous current location marker and add new one at current position
-//        if (mCurrLocation != null) {
-//            mCurrLocation.remove();
-//        }
-//        Location location = null;
-//        latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
-//        Toast.makeText(this,"Location Changed",Toast.LENGTH_SHORT).show();
-
-        //If you only need one location, unregister the listener
-        //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 }

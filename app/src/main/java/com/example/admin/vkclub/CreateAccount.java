@@ -194,8 +194,6 @@ public class CreateAccount extends AppCompatActivity {
 
                 if (nameStatus && emailStatus && passwordStatus && confirmpassStatus) {
                     createAccount(emailValue, passwordValue,nameValue);
-                }else {
-                    presentDialog("Error", "Something went wrong.");
                 }
             }
         });

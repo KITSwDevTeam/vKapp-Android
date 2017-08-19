@@ -1,49 +1,41 @@
 package com.example.admin.vkclub;
 
-import android.*;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.content.ComponentName;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 public class Setting extends AppCompatActivity {
 
-    private ToggleButton mtoggle ;
     private TextView mHelp;
-    private Switch msetting;
-    SharedPreferences pre;
-
+    private Switch msetting, mNotification;
+    SharedPreferences preference,prefs;
+    SharedPreferences.Editor editor,editors;
+    Boolean isFirstLaunch,istrue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
 
-//        mtoggle = (ToggleButton) findViewById(R.id.toggleBtn);
         msetting = (Switch) findViewById(R.id.settingbtn);
+        mNotification = (Switch) findViewById(R.id.locationbtn);
         mHelp = (TextView) findViewById(R.id.help);
 
         ActionBar actionBar = getSupportActionBar();
@@ -57,32 +49,100 @@ public class Setting extends AppCompatActivity {
             window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorStatusBar));
         }
 
-        //set switch on as default
-        msetting.setChecked(true);
-
-//        msetting.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(Setting.this);
-//                alertDialog.setTitle("Notification");
-//                alertDialog.setMessage("Notifications includes Digital News Content, also Group Chat alert.Turn OFF to avoid push notifications.");
-//                AlertDialog.Builder confirm = alertDialog.setPositiveButton("TURN OFF", new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int which) {
-//                    }
-//                });
+        //set switch on as defaults
+        preference = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+        isFirstLaunch = preference.getBoolean("noti_setting", false);
+        Log.i("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",isFirstLaunch.toString());
+        if (isFirstLaunch){
+//            if(istrue = prefs.getBoolean("isTrue",true)){
+//                msetting.setChecked(true);
+//            }else if(istrue = prefs.getBoolean("isTrue",false)){
+//                msetting.setChecked(false);
+//            }else {
 //
-//                // Setting Negative "NO" Button
-//                alertDialog.setNegativeButton("TURN ON", new DialogInterface.OnClickListener() {
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        // Write your code here to execute after dialog
-//                        Toast.makeText(getApplicationContext(), "You clicked on Cancel", Toast.LENGTH_SHORT).show();
-//                        dialog.cancel();
-//                    }
-//                });
-//                // Showing Alert Message
-//                alertDialog.show();
 //            }
-//        });
+            prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+            istrue = prefs.getBoolean("isTrue",false);
+            Log.i("IIIIIIIIIIIIIIIIIIIIIIIIII",istrue.toString());
+            if(istrue==true){
+                msetting.setChecked(true);
+            }else {
+                msetting.setChecked(false);
+            }
+            msetting.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                    if(msetting.isChecked()){
+                        msetting.setChecked(true);
+                        Log.i("+++++++++++++++++++++++++++++++++",msetting.toString());
+
+                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+                        editors = prefs.edit();
+                        editors.putBoolean("isTrue", true);
+                        editors.commit();
+
+                        PackageManager pm = getApplicationContext().getPackageManager();
+                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
+                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                    }else {
+                        msetting.setChecked(false);
+                        Log.i("------------------------------------",msetting.toString());
+
+                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+                        editors = prefs.edit();
+                        editors.putBoolean("isTrue", false);
+                        editors.commit();
+
+                        PackageManager pm = getApplicationContext().getPackageManager();
+                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
+                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                    }
+                }
+            });
+        }else {
+            editor = preference.edit();
+            editor.putBoolean("noti_setting", true);
+            editor.commit();
+
+            msetting.setChecked(true);
+            prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+            editors = prefs.edit();
+            editors.putBoolean("isTrue", true);
+            editors.commit();
+            msetting.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(b==true){
+
+                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+                        editors = prefs.edit();
+                        editors.putBoolean("isTrue",true);
+                        Log.i("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV",editor.toString());
+                        editors.commit();
+                        PackageManager pm = getApplicationContext().getPackageManager();
+                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
+                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                    }else {
+                        prefs = PreferenceManager.getDefaultSharedPreferences(Setting.this);
+                        editors = prefs.edit();
+                        editors.putBoolean("isTrue",false);
+                        Log.i("PPPPPPPPPPPPPPPPPPPPPPPPPPP",editor.toString());
+                        editors.commit();
+                        PackageManager pm = getApplicationContext().getPackageManager();
+                        ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
+                        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                    }
+                }
+            });
+
+
+            Log.i("*********************",msetting.toString());
+            PackageManager pm = getApplicationContext().getPackageManager();
+            ComponentName componentName = new ComponentName(Setting.this, MyFirebaseMessagingService.class);
+            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+
+        }
+
 
         //Help Alert
         mHelp.setOnClickListener(new View.OnClickListener() {
