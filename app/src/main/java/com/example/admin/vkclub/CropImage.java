@@ -1,6 +1,5 @@
 package com.example.admin.vkclub;
 
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 

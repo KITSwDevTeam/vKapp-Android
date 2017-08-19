@@ -13,8 +13,6 @@ import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;

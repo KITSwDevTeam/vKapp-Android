@@ -1,7 +1,5 @@
 package com.example.admin.vkclub;
 
-import android.content.Context;
-import android.widget.ImageView;
 
 /**
  * Created by admin on 7/23/2017.

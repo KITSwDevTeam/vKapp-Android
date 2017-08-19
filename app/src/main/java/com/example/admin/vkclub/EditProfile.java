@@ -51,10 +51,6 @@ public class EditProfile extends DialogFragment {
     private EditText mName,mEmail,mConfirmpassword;
     private TextView mNamevalidation,mEmailvalidation,mConfirmpassvalidation,mUpdatepass;
     private Button Updateprofile;
-    private static boolean nameStatus, emailStatus, confirmpassStatus;
-
-    SharedPreferences.Editor editor;
-    private static boolean flag;
     Dashboard dh;
 
     @Nullable
@@ -72,28 +68,20 @@ public class EditProfile extends DialogFragment {
         mConfirmpassword = (EditText) view.findViewById(R.id.confirmpass1);
         Updateprofile = (Button) view.findViewById(R.id.updateprofile);
         mUpdatepass = (TextView) view.findViewById(R.id.updatepass);
-
         mNamevalidation = (TextView) view.findViewById(R.id.nameValidation1);
         mEmailvalidation = (TextView) view.findViewById(R.id.emailValidation1);
         mConfirmpassvalidation = (TextView) view.findViewById(R.id.confirmpassValidation);
-
         //get name and email info of user from firebase
         user = mAuth.getCurrentUser();
         mName.setText(user.getDisplayName());
         mEmail.setText(user.getEmail());
-
 //        DatabaseReference myRef = database.getReference("message");
-
         preference = PreferenceManager.getDefaultSharedPreferences(getContext());
         final String currentpass = preference.getString("pass",null);
-        if(!currentpass.equals(null)){
-            Log.d("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH  ", currentpass);
-        }
 
         TextWatcher editTextWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (mName.getText().hashCode() == s.hashCode()){
@@ -199,7 +187,6 @@ public class EditProfile extends DialogFragment {
             }
         });
     }
-
 
     private void updateaccount(final String getname, final String getemail, final String getconfirmpass){
         user = mAuth.getCurrentUser();

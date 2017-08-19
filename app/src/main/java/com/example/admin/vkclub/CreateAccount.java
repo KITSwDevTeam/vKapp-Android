@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -12,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -20,23 +18,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-
 import java.util.regex.Pattern;
-
-import static com.example.admin.vkclub.R.id.emailValidation;
-import static com.example.admin.vkclub.R.id.nameValidation;
 
 public class CreateAccount extends AppCompatActivity {
     // Declare Firebase auth
@@ -50,11 +41,9 @@ public class CreateAccount extends AppCompatActivity {
 
     // Declare TextView
     TextView nameValidate, emailValidate, passValidate, confirmpassValidate, statusText;
-
     private ProgressBar spinner;
     private static boolean nameStatus, emailStatus, passwordStatus, confirmpassStatus;
 
-    static boolean flag;
     private static ProgressDialog progressDialog;
 
     @Override
